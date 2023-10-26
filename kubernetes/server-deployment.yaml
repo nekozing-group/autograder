@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: autograder-deployment
+  labels:
+    app: autograder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: autograder
+  template:
+    metadata:
+      labels:
+        app: autograder
+    spec:
+      serviceAccountName: autograder
+      containers:
+      - name: autograder-container
+        image: autograder:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8001

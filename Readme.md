@@ -1,8 +1,15 @@
 # Dev Notes
 
-* Build docker image: `docker build -t testrunner ./testrunner/`
+
+
+* Build testrunner docker image: `docker build -t testrunner ./testrunner/`
+
+
+
 * Start server: `uvicorn src/server:app --reload`
 * Test Request: `curl -X POST -H "Content-Type: application/json" --data @test_code.json http://127.0.0.1:8000/grade/01`
+* Builder Server Image: `docker build -t autograder .`
+* Start server container: `docker run -p 8001:8001 autograder`
 
 * Debug docker image file structure: `docker run -it --entrypoint /bin/sh testrunner`
 

@@ -5,8 +5,12 @@ import tempfile
 import sys
 from pydantic import BaseModel
 from fastapi import FastAPI
+from .clients.testrunner_client import TestrunnerClient
+
 
 app = FastAPI()
+
+testrunner_client = TestrunnerClient()
 
 class CodePayload(BaseModel):
     code: str
@@ -25,18 +29,10 @@ async def read_item(item_id: int, q: Union[str, None] = None):
 
 @app.post('/grade/{problem_id}')
 async def grade_problem(problem_id: str, payload: CodePayload):
-    code = payload.code
+    code = payload.code.encode()
     # docker run -v /path/on/host:/path/in/container testrunner /path/in/container/filename.txt test1
-    result = None
-    with tempfile.NamedTemporaryFile(suffix='.py', delete=True) as tmp:
-        tmp.write(code.encode())
-        print(code.encode())
-        tmp.flush()
-        try:
-            result = subprocess.check_output(['docker', 'run', '-v', f'{tmp.name}:/input/solution.py', 'testrunner', problem_id])
-        except CalledProcessError as e:
-            print(e.output, file=sys.stderr)
-            raise e
+    
+    result = testrunner_client.execute_code(problem_id, code)
     return {"message": f"Code for problem {problem_id} received!", "content": code, "exec_result": result}
 
 
