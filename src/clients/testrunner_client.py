@@ -1,62 +1,78 @@
-import subprocess
-import tempfile
-import sys
+import uuid
 from kubernetes import client, config
+
+try:
+    # Try to load the in-cluster configuration
+    config.load_incluster_config()
+except config.ConfigException:
+    # If it fails (meaning we're outside of the cluster), load the kubeconfig
+    try:
+        config.load_kube_config()
+    except config.ConfigException:
+        raise RuntimeError("Could not configure kubernetes python client.")
 
 class TestrunnerClient:
     def __init__(self):
-        config.load_kube_config()
-        self.api = client.BatchV1Api()
+        self.batch_api = client.BatchV1Api()
 
-    def execute_code(self, problem_id: str, code: str):
-        job = {
-            
-        }
-        self.api.create_namespaced_job(
+    # TODO implement test case
+    def execute_code(self, session_id: str, code: str, test_case: str):
+        # TODO store file
+        job = self.create_job_spec('file-execution-job')
+
+        self.batch_api.create_namespaced_job(
             namespace='default',
             body=job
         )
-        pass
+        return
 
-    def create_job_spec(self):
-            volume = client.V1Volume(
-                name="testrunner:latest",
-                persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(claim_name="sandbox-pvc")
-            )
+    def store_code_as_file(self, session_id: str, code: str):
+        with open(f'/input/{id}.py', 'w') as file:
+            file.write(code)
 
-            # Define where to mount the volume in the container
-            volume_mount = client.V1VolumeMount(
-                mount_path="/input",  # Change to desired path in the container
-                name="my-volume"
-            )
+    def create_job_spec(self, session_id: str):
+        volume = client.V1Volume(
+            name="file-volume",
+            persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(claim_name="autograder-pvc")
+        )
 
-            # Define the container to run in the job
-            container = client.V1Container(
-                name="my-container",
-                image="testrunner:latest",
-                command=["your-command", "arg1", "arg2"],  # If you have a specific command to run
-                volume_mounts=[volume_mount]
-            )
+        # Define where to mount the volume in the container
+        volume_mount = client.V1VolumeMount(
+            mount_path="/input",  # Change to desired path in the container
+            name="file-volume"
+        )
 
-            # Define the pod template which contains the container and volume
-            template = client.V1PodTemplateSpec(
-                metadata=client.V1ObjectMeta(labels={"app": "my-job"}),
-                spec=client.V1PodSpec(restart_policy="Never", containers=[container], volumes=[volume])
-            )
+        # Define the container to run in the job
+        container = client.V1Container(
+            name='testrunner-container',
+            image="testrunner:latest",
+            image_pull_policy='IfNotPresent',
+            command=["hello_world/hello_world", "hello world"],
+            volume_mounts=[volume_mount]
+        )
 
-            # Define the job spec
-            spec = client.V1JobSpec(
-                template=template,
-                backoff_limit=4  # Specifies the number of retries before marking the job as failed
-            )
+        # Define the pod template which contains the container and volume
+        template = client.V1PodTemplateSpec(
+            metadata=client.V1ObjectMeta(name=session_id),
+            spec=client.V1PodSpec(restart_policy="Never", containers=[container], volumes=[volume])
+        )
 
-            # Define the job
-            job = client.V1Job(
-                api_version="batch/v1",
-                kind="Job",
-                metadata=client.V1ObjectMeta(name="my-job"),
-                spec=spec
-            )
+        # Define the job spec
+        spec = client.V1JobSpec(
+            template=template,
+            ttl_seconds_after_finished=600,
+            backoff_limit=0  # Specifies the number of retries before marking the job as failed
+        )
+
+        # Define the job
+        job = client.V1Job(
+            api_version="batch/v1",
+            kind="Job",
+            metadata=client.V1ObjectMeta(name=session_id),
+            spec=spec
+        )
+
+        return job
 
     # def execute_code(self, problem_id: str, code: str):
     #     result = None

@@ -1,8 +1,4 @@
 from typing import Union
-from subprocess import CalledProcessError
-import subprocess
-import tempfile
-import sys
 from pydantic import BaseModel
 from fastapi import FastAPI
 from .clients.testrunner_client import TestrunnerClient
@@ -30,9 +26,8 @@ async def read_item(item_id: int, q: Union[str, None] = None):
 @app.post('/grade/{problem_id}')
 async def grade_problem(problem_id: str, payload: CodePayload):
     code = payload.code.encode()
-    # docker run -v /path/on/host:/path/in/container testrunner /path/in/container/filename.txt test1
-    
-    result = testrunner_client.execute_code(problem_id, code)
+        
+    result = testrunner_client.execute_code(problem_id, code, '')
     return {"message": f"Code for problem {problem_id} received!", "content": code, "exec_result": result}
 
 
