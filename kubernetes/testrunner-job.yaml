@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: file-execution-job
+spec:
+  ttlSecondsAfterFinished: 600  # Delete the Job and its Pods 600 seconds (10 minutes) after it completes
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+      - name: testrunner-container
+        image: testrunner:latest
+        imagePullPolicy: IfNotPresent
+        args: ["hello_world/hello_world", "hello world"]  # Argument to the container
+        volumeMounts:
+        - name: file-volume
+          mountPath: /input
+      restartPolicy: Never
+      volumes:
+      - name: file-volume
+        persistentVolumeClaim:
+          claimName: autograder-pvc

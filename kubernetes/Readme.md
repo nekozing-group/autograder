@@ -7,7 +7,7 @@ kubectl apply -f your-deployment-file.yaml
 
 create the deployment `kubectl apply -f autograder-deployment.yaml`  
 `kubectl get pods -l app=autograder`
-`kubectl delete service autograder-service`
+`kubectl delete deployment autograder-deployment`
 
 ```
 eval $(minikube docker-env)
@@ -18,7 +18,7 @@ Run
 `kubectl apply -f autograder-deployment.yaml`  
   
 Stop  
-`kubectl delete service autograder-service`  
+`kubectl delete deployment autograder-deployment`  
   
 See logs  
 `kubectl logs -f autograder-deployment-dbdcddd6-82skp` (whatever the deployment name is)  `kubectl get pods`
@@ -37,4 +37,13 @@ To get the IP:
 `minikube ip`
 
 
+`kubectl proxy --port 9000`
 
+
+
+kubectl logs -f jobs/file-execution-job  
+kubectl describe pod file-execution-job-qjknj
+kubectl logs file-execution-job-qjknj -c testrunner
+
+
+minikube mount /home/nekozing/autograder-kubernetes-pv:/home/nekozing/autograder-kubernetes-pv
