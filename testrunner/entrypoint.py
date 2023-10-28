@@ -1,17 +1,9 @@
 import sys
 import subprocess
 import os
+import logging
 
-# def run_test1(filepath):
-#     with open(filepath, 'r') as file:
-#         content = file.read()
-#     print(f"Running test1 on: {content}")
-
-# def run_test2(filepath):
-#     with open(filepath, 'r') as file:
-#         content = file.read()
-#     print(f"Running test2 on: {content}")
-
+log = logging.getLogger(__name__)
 
 def run_test(test_path):
     result = None
@@ -27,11 +19,22 @@ def run_test(test_path):
 
     print(result.stdout)
 
-def run_native_test(input_code_path, test_case):
-    # for now test_case == eval(input_code)
-    result = None
+# TODO better encapsulation
+# TODO resolve problem id to test cases
+def get_test_cases(problem_id: str):
+    if problem_id == 'hello_world':
+        return ['hello world', 'hello world']
+    else:
+        raise KeyError(f'test case definition for {problem_id} not found')
+
+# TODO load test case and run it agains input code path. get input code path output
+def run_native_test(input_code_path: str, problem_id: str):
+    test_cases = get_test_cases(problem_id)
     try:
-        result = subprocess.run(['python', input_code_path], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        for test_case in test_cases:
+            result = subprocess.run(['python', input_code_path], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            code_output = result.stdout.strip()
+            assert code_output == test_case
     except subprocess.CalledProcessError as e:
         print(f"Command failed with error code {e.returncode}")
         print("Standard Output:")
@@ -39,24 +42,22 @@ def run_native_test(input_code_path, test_case):
         print("Standard Error:")
         print(e.stderr)
         return
-    print(result)
-    assert result.stdout.strip() == test_case
+    print('all tests successful')
 
 
 if __name__ == "__main__":
     # Check if both arguments are provided
     if len(sys.argv) != 3:
-        print("You must provide exactly 2 arguments: <input_file>, <test_case>")
+        print("You must provide exactly 2 arguments: <input_file>, <problem_id>")
         sys.exit(1)
 
     # Extract arguments
-    input_file = sys.argv[1]
-    test_case = sys.argv[2]
-    print(input_file)
-    input_code_path = os.path.join('/input', f'{input_file}.py')
+    input_file_path = sys.argv[1] # the file to execute. this requires mount to be at the same path
+    problem_id = sys.argv[2]
+    print(input_file_path, problem_id)
 
-    if not os.path.isfile(input_code_path):
-        print(f'could not get code to run: {input_code_path}')
+    if not os.path.isfile(input_file_path):
+        print(f'could not get code to run: {input_file_path}')
         sys.exit(1)
 
-    run_native_test(input_code_path, test_case)
+    run_native_test(input_file_path, problem_id)

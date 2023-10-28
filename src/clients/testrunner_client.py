@@ -1,5 +1,8 @@
 import uuid
 from kubernetes import client, config
+import logging
+
+log = logging.getLogger(__name__)
 
 try:
     # Try to load the in-cluster configuration
@@ -16,10 +19,9 @@ class TestrunnerClient:
         self.batch_api = client.BatchV1Api()
 
     # TODO implement test case
-    def execute_code(self, session_id: str, code: str, test_case: str):
-        # TODO store file
-        job = self.create_job_spec('file-execution-job')
-
+    def execute_code(self, session_id: str, code: str, problem_id: str):
+        file_path = self.store_code_as_file(session_id, code)
+        job = self.create_job_spec(file_path, session_id, problem_id)
         self.batch_api.create_namespaced_job(
             namespace='default',
             body=job
@@ -27,10 +29,12 @@ class TestrunnerClient:
         return
 
     def store_code_as_file(self, session_id: str, code: str):
-        with open(f'/input/{id}.py', 'w') as file:
+        file_path = f'/input/{session_id}.py'
+        with open(file_path, 'w') as file:
             file.write(code)
+        return file_path
 
-    def create_job_spec(self, session_id: str):
+    def create_job_spec(self, input_file_path: str, session_id: str, problem_id: str):
         volume = client.V1Volume(
             name="file-volume",
             persistent_volume_claim=client.V1PersistentVolumeClaimVolumeSource(claim_name="autograder-pvc")
@@ -47,7 +51,7 @@ class TestrunnerClient:
             name='testrunner-container',
             image="testrunner:latest",
             image_pull_policy='IfNotPresent',
-            command=["hello_world/hello_world", "hello world"],
+            command=[input_file_path, problem_id],
             volume_mounts=[volume_mount]
         )
 

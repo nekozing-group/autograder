@@ -11,7 +11,7 @@ spec:
       - name: testrunner-container
         image: testrunner:latest
         imagePullPolicy: IfNotPresent
-        args: ["hello_world/hello_world", "hello world"]  # Argument to the container
+        args: ["/input/hello_world/hello_world.py", "hello_world"]  # Argument to the container. You must provide exactly 2 arguments: <input_file>, <problem_id>
         volumeMounts:
         - name: file-volume
           mountPath: /input

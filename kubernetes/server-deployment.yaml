@@ -19,5 +19,24 @@ spec:
       - name: autograder-container
         image: autograder:latest
         imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: file-volume
+          mountPath: /input
         ports:
         - containerPort: 8001
+      volumes:
+      - name: file-volume
+        persistentVolumeClaim:
+          claimName: autograder-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: autograder-service
+spec:
+  selector:
+    app: autograder
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001

@@ -47,3 +47,6 @@ kubectl logs file-execution-job-qjknj -c testrunner
 
 
 minikube mount /home/nekozing/autograder-kubernetes-pv:/home/nekozing/autograder-kubernetes-pv
+
+
+`kubectl port-forward service/autograder-service 8001:8001`  
