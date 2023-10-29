@@ -46,7 +46,16 @@ kubectl describe pod file-execution-job-qjknj
 kubectl logs file-execution-job-qjknj -c testrunner
 
 
-minikube mount /home/nekozing/autograder-kubernetes-pv:/home/nekozing/autograder-kubernetes-pv
 
 
+`minikube mount /home/nekozing/autograder-kubernetes-pv:/home/nekozing/autograder-kubernetes-pv`
+
+Proxy to service
 `kubectl port-forward service/autograder-service 8001:8001`  
+
+```
+Get the Kubernetes Dashboard URL by running:
+  export POD_NAME=$(kubectl get pods -n kubernetes-dashboard -l "app.kubernetes.io/name=kubernetes-dashboard,app.kubernetes.io/instance=kubernetes-dashboard" -o jsonpath="{.items[0].metadata.name}")
+  echo https://127.0.0.1:8443/
+  kubectl -n kubernetes-dashboard port-forward $POD_NAME 8443:8443
+```

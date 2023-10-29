@@ -80,7 +80,7 @@ class TestrunnerClient:
             name='testrunner-container',
             image="testrunner:latest",
             image_pull_policy='IfNotPresent',
-            args=[input_file_path, problem_id],
+            args=[session_id, input_file_path, problem_id],
             volume_mounts=[volume_mount]
         )
 
