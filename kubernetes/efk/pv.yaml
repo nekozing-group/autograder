@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: es-data-pv
+  labels:
+    app: elasticsearch
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: do-block-storage
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/home/nekozing/autograder-es-data-pv"  # NOTE: This is a directory path on your node where the data will be stored. Replace with an appropriate path.

@@ -57,11 +57,10 @@ class TestrunnerClient:
 
     def store_code_as_file(self, session_id: str, code: str):
         dir = '/input' if is_cluster else '/home/nekozing/autograder-kubernetes-pv' # need to write to local mount
-        
         file_path = os.path.join(dir, f'{session_id}.py')
         with open(file_path, 'w') as file:
             file.write(code)
-        
+        log.info('wrote code to path %s', file_path)
         return os.path.join('/input', f'{session_id}.py')
 
     def create_job_spec(self, input_file_path: str, session_id: str, problem_id: str):
