@@ -21,7 +21,6 @@ batch_api = client.BatchV1Api()
 core_api = client.CoreV1Api()
 
 class TestrunnerClient:
-
     def __init__(self):
         self.timeout_seconds = 10 # TODO need to refactor outside of client instance
 
@@ -37,7 +36,6 @@ class TestrunnerClient:
         tle = False
         start_time = time.time()
         for event in w.stream(batch_api.list_namespaced_job, namespace='default', timeout_seconds=self.timeout_seconds): # TODO TLE
-            log.info(event)
             if event['object'].metadata.name == session_id:
                 if event['object'].status.succeeded == 1:
                     log.info("Job Completed Successfully")
@@ -52,7 +50,15 @@ class TestrunnerClient:
             return 'TLE'
         
         logs = self.get_job_pod_logs(session_id)
-        return logs
+        log.info('testrunner job run result:')
+        log.info(logs)
+        log_iter = iter(logs.split('\n'))
+        result_json_str = None
+        for line in log_iter:
+            if line == '----':
+                result_json_str = next(log_iter, None)
+                break
+        return result_json_str
 
 
     def store_code_as_file(self, session_id: str, code: str):
