@@ -22,10 +22,6 @@ async def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-
 @app.get('/problem_statement/{problem_id}')
 async def problem_statement(problem_id: str):
     problem_statement = data_client.get_problem_statement(problem_id)
