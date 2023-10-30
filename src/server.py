@@ -2,6 +2,7 @@ from typing import Union
 from pydantic import BaseModel
 from fastapi import FastAPI
 from .clients.testrunner_client import TestrunnerClient
+from .clients.data_client import DataClient
 import logging
 import uuid
 
@@ -10,6 +11,7 @@ log = logging.getLogger(__name__)
 app = FastAPI()
 
 testrunner_client = TestrunnerClient()
+data_client = DataClient()
 
 class CodePayload(BaseModel):
     code: str
@@ -24,7 +26,13 @@ async def read_root():
 async def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
-
+@app.get('/problem_statement/{problem_id}')
+async def problem_statement(problem_id: str):
+    problem_statement = data_client.get_problem_statement(problem_id)
+    return {
+        'problem_id': problem_id,
+        'problem_statement': problem_statement
+    }
 
 @app.post('/grade/{problem_id}')
 async def grade_problem(problem_id: str, payload: CodePayload):
@@ -33,15 +41,3 @@ async def grade_problem(problem_id: str, payload: CodePayload):
     session_id = str(uuid.uuid4())
     result = testrunner_client.execute_code(session_id, code, problem_id)
     return {"message": f"Code for problem {problem_id} received!", "content": code, "exec_result": result}
-
-
-'''
-import subprocess
-import tempfile
-
-with tempfile.NamedTemporaryFile(suffix=".py", delete=True) as tmp:
-    tmp.write(code_str.encode())
-    tmp.flush()  
-    output = subprocess.check_output(["python", tmp.name])
-print(output)
-'''
