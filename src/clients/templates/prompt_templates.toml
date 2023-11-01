@@ -1,0 +1,7 @@
+[palm.template]
+prompt_template = '''
+Here's some code that someone wrote for a python coding challenge, and it failed to pass the test. Identify the mistake pattern in the code implentation, and give advice on how to prevent the mistake.
+Some possible mistake patterns are, but limited to: wrong understanding of algorithm, off-by-one error, python language usage error, confusion of assignment vs comparison, and so on.
+Problem: ${PROBLEM}
+Code:
+${CODE}'''

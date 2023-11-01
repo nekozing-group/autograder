@@ -21,10 +21,9 @@ v0.0.1: Able to execute code within container.
 v0.0.9: able to execute a specified test against the input file  
 v0.1  : add basic UI  
 v0.2  : able to execute a specified series of tests against the input file  
+v0.2.5: pass different testrun errors back from the autograder, including compile errors
 
 TODO:  
-  
-v0.2.5: pass different testrun errors back from the autograder, including compile errors
 v0.3  : able to dynamically load tests in the UI  
 v0.5  : add interview algorithm test cases in testrunner  
 v0.8  : add LLM code analysis in server  

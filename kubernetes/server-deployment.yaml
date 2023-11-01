@@ -24,6 +24,12 @@ spec:
           mountPath: /input
         ports:
         - containerPort: 8001
+        env:
+        - name: PALM_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: palm-api-key
+              key: PALM_API_KEY
       volumes:
       - name: file-volume
         persistentVolumeClaim:

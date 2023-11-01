@@ -1,8 +1,8 @@
-from typing import Union
+from typing import Optional
 from pydantic import BaseModel
 from fastapi import FastAPI
 from .clients.testrunner_client import TestrunnerClient
-from .clients.data_client import DataClient
+from .clients.problem_data_client import ProblemDataClient
 import logging
 import uuid
 
@@ -11,18 +11,22 @@ log = logging.getLogger(__name__)
 app = FastAPI()
 
 testrunner_client = TestrunnerClient()
-data_client = DataClient()
+data_client = ProblemDataClient()
+
 
 class CodePayload(BaseModel):
+    user_id: Optional[str] = 'testuser'
     code: str
-
 
 @app.get("/")
 async def read_root():
     return {"Hello": "World"}
 
+@app.get('/problems')
+async def list_problems():
+    return data_client.list_problems()
 
-@app.get('/problem_statement/{problem_id}')
+@app.get('/problems/{problem_id}')
 async def problem_statement(problem_id: str):
     problem_statement = data_client.get_problem_statement(problem_id)
     return {
