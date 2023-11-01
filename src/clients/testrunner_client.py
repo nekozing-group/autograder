@@ -1,7 +1,10 @@
 from kubernetes import client, config, watch
 import logging
 import time
+import json
 import os
+
+from ..models import JobResult
 
 log = logging.getLogger(__name__)
 is_cluster = True
@@ -25,7 +28,7 @@ class TestrunnerClient:
         self.timeout_seconds = 10 # TODO need to refactor outside of client instance
 
     # TODO implement test case
-    def execute_code(self, session_id: str, code: str, problem_id: str):
+    def execute_code(self, session_id: str, code: str, problem_id: str) -> JobResult:
         file_path = self.store_code_as_file(session_id, code)
         job_spec = self.create_job_spec(file_path, session_id, problem_id)
         job = batch_api.create_namespaced_job(
@@ -33,7 +36,6 @@ class TestrunnerClient:
             body=job_spec
         )
 
-        tle = False
         start_time = time.time()
         for event in w.stream(batch_api.list_namespaced_job, namespace='default', timeout_seconds=self.timeout_seconds): # TODO TLE
             if event['object'].metadata.name == session_id:
@@ -44,10 +46,7 @@ class TestrunnerClient:
                     log.error("Job Failed")
                     w.stop()
         if time.time() - start_time > self.timeout_seconds:
-            tle = True
-
-        if tle:
-            return 'TLE'
+            raise TimeLimitExceededException()
         
         logs = self.get_job_pod_logs(session_id)
         log.info('testrunner job run result:')
@@ -58,7 +57,11 @@ class TestrunnerClient:
             if line == '----':
                 result_json_str = next(log_iter, None)
                 break
-        return result_json_str
+
+        if result_json_str == None:
+            raise JobExecutionException(f'failed to retrieve results from testrunner. session_id: {session_id}, problem_id: {problem_id}')
+        
+        return JobResult.model_validate(json.loads(result_json_str))
 
 
     def store_code_as_file(self, session_id: str, code: str):
@@ -126,3 +129,9 @@ class TestrunnerClient:
         logs = core_api.read_namespaced_pod_log(pod_name, namespace)
         
         return logs
+    
+class TimeLimitExceededException(Exception):
+    pass
+
+class JobExecutionException(Exception):
+    pass

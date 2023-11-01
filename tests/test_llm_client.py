@@ -1,5 +1,4 @@
-from src.clients.llm_client import LLMClient
+from src.clients.llm_client import PROMPT_TEMPLATE
 
 def test_llm_client():
-    client = LLMClient()
-    assert len(client.template.template) > 0
+    assert len(PROMPT_TEMPLATE.template) > 0
