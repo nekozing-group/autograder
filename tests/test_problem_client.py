@@ -1,9 +1,5 @@
 from src.clients.problem_data_client import ProblemDataClient
 
-
-def test_schema():
-    pass
-
 def test_problem_client():
     client = ProblemDataClient()
     problem_list = client.list_problems()

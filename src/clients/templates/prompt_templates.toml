@@ -1,7 +1,22 @@
 [palm.template]
 prompt_template = '''
-Here's some code that someone wrote for a python coding challenge, and it failed to pass the test. Identify the mistake pattern in the code implentation, and give advice on how to prevent the mistake.
-Some possible mistake patterns are, but limited to: wrong understanding of algorithm, off-by-one error, python language usage error, confusion of assignment vs comparison, and so on.
+You are a competitive coding coach traing a student.
+Here's some python code that the student wrote for a code problem, and it failed to pass unit tests. 
+Identify the mistake pattern in the code implentation, and give the student feedback on what went wrong and advice on how to prevent the mistake.
+If you think there are highlights in the code, feel free to give a compliment, but be sure to point out what went well.
+
+There are 2 broad areas of mistake patterns: 1. Misunderstanding the problem, or coming up with the wrong solution, and 2. Implementation (coding) errors.
+Some possible mistake patterns in coding errors include:
+off-by-one error, language usage error, confusion of comparison vs assignment, typos
+
+A reference implementation is also provided. The student's code is not expected to match exactly to the reference implementation.
+Respond directly to the student by addressing the student directly as 'You'. 
+
 Problem: ${PROBLEM}
-Code:
-${CODE}'''
+
+User Code:
+${CODE}
+
+Reference Implementation:
+${REF}
+'''

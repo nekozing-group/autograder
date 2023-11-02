@@ -11,9 +11,6 @@ log = logging.getLogger(__name__)
 
 app = FastAPI()
 
-testrunner_client = TestrunnerClient()
-data_client = ProblemDataClient()
-
 grader = Grader()
 
 class GradeProblemPayload(BaseModel):
@@ -26,10 +23,11 @@ async def read_root():
 
 @app.get('/problems')
 async def list_problems():
-    return data_client.list_problems()
+    return ProblemDataClient.list_problems()
 
 @app.get('/problems/{problem_id}')
 async def problem_statement(problem_id: str):
+    data_client = ProblemDataClient(problem_id)
     problem_statement = data_client.get_problem_description(problem_id)
     return {
         'problem_id': problem_id,
@@ -41,5 +39,5 @@ async def grade_problem(problem_id: str, payload: GradeProblemPayload):
     code = payload.code
     log.info('received payload %s', payload.model_dump_json())
     session_id = str(uuid.uuid4())
-    result = testrunner_client.execute_code(session_id, code, problem_id)
-    return {"message": f"Code for problem {problem_id} received!", "content": code, "exec_result": result}
+    result = grader.grade_code(session_id, code, problem_id)
+    return {"message": f"Code for problem {problem_id} received!", "exec_result": result}

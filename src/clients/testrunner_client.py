@@ -4,7 +4,7 @@ import time
 import json
 import os
 
-from ..models import JobResult
+from shared.models import JobResult
 
 log = logging.getLogger(__name__)
 is_cluster = True

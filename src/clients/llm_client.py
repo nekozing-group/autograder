@@ -22,10 +22,11 @@ class LLMClient:
     def __init__(self):
         pass
 
-    def llm_debug_code(self, problem_description_short: str, code: str):
+    def get_llm_advice(self, problem_description_short: str, code: str, reference_code: str):
         prompt = PROMPT_TEMPLATE.safe_substitute({
             'PROBLEM': problem_description_short,
-            'CODE' : code
+            'CODE' : code,
+            'REF': reference_code
         })
 
         payload = {
