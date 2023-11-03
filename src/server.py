@@ -1,8 +1,8 @@
 from typing import Optional
 from pydantic import BaseModel
 from fastapi import FastAPI
-from .clients.testrunner_client import TestrunnerClient
 from .clients.problem_data_client import ProblemDataClient
+from .models import GetProblemStatementResponse, GradeProblemRequest, GradeProblemResponse, ListProblemsResponse
 from .grader import Grader
 import logging
 import uuid
@@ -13,31 +13,25 @@ app = FastAPI()
 
 grader = Grader()
 
-class GradeProblemPayload(BaseModel):
-    user_id: Optional[str] = 'testuser'
-    code: str
-
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
-
 @app.get('/problems')
-async def list_problems():
-    return ProblemDataClient.list_problems()
+async def list_problems() -> ListProblemsResponse:
+    problem_id_list = ProblemDataClient.list_problems()
+    return ListProblemsResponse(problem_id_list=problem_id_list)
 
 @app.get('/problems/{problem_id}')
-async def problem_statement(problem_id: str):
+async def get_problem_statement(problem_id: str) -> GetProblemStatementResponse:
     data_client = ProblemDataClient(problem_id)
     problem_statement = data_client.get_problem_description()
-    return {
-        'problem_id': problem_id,
-        'problem_statement': problem_statement
-    }
+    return GetProblemStatementResponse(
+        problem_id=problem_id, 
+        problem_statement=problem_statement
+    )
 
 @app.post('/grade/{problem_id}')
-async def grade_problem(problem_id: str, payload: GradeProblemPayload):
+async def grade_problem(problem_id: str, payload: GradeProblemRequest) -> GradeProblemResponse:
     code = payload.code
     log.info('received payload %s', payload.model_dump_json())
     session_id = str(uuid.uuid4())
     result = grader.grade_code(session_id, code, problem_id)
-    return {"message": f"Code for problem {problem_id} received!", "exec_result": result}
+    response = GradeProblemResponse.model_validate(result.model_dump())
+    return response
