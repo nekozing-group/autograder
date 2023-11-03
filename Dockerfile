@@ -7,4 +7,6 @@ RUN pip install -r /server/requirements.txt
 COPY . /server
 
 RUN chmod +x /server/entrypoint.sh
+
+WORKDIR /server
 ENTRYPOINT ["/server/entrypoint.sh"]

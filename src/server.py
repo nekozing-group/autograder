@@ -28,7 +28,7 @@ async def list_problems():
 @app.get('/problems/{problem_id}')
 async def problem_statement(problem_id: str):
     data_client = ProblemDataClient(problem_id)
-    problem_statement = data_client.get_problem_description(problem_id)
+    problem_statement = data_client.get_problem_description()
     return {
         'problem_id': problem_id,
         'problem_statement': problem_statement
